@@ -37,6 +37,17 @@ CREATE TABLE ski (
     FOREIGN KEY (id_marque) REFERENCES marque(id_marque)
 );
 
+-- Création de la table utilisateur
+CREATE TABLE utilisateur (
+    id_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
+    login VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    est_actif BOOLEAN DEFAULT true,
+    nom VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
+
 -- Insertions des données de base
 INSERT INTO longueur (libelle_taille) VALUES 
 (150), (160), (170), (180);
@@ -63,7 +74,9 @@ INSERT INTO marque (nom_marque) VALUES
 ('Head'),
 ('Dynastar'),
 ('K2'),
-('Völkl');
+('Völkl'),
+('Nordica'),
+('Elan');
 
 INSERT INTO ski (nom_ski, prix_ski, largeur_ski, conseil_utilisation, id_longueur, id_type_ski, id_fournisseur, id_marque, photo_ski) VALUES
 ('Experience 80', 399.99, 80, 'Parfait pour les skieurs intermédiaires', 1, 1, 1, 1, 'images/experience-80.jpg'),
@@ -84,10 +97,42 @@ INSERT INTO ski (nom_ski, prix_ski, largeur_ski, conseil_utilisation, id_longueu
 ('ARV 106', 729.99, 106, 'Ski freestyle backcountry', 3, 3, 3, 2, 'images/arv-106.jpg'),
 ('RC4 WC CT', 999.99, 72, 'Ski de course haut niveau', 2, 5, 1, 4, 'images/rc4-wc-ct.jpg'),
 ('Skating RS', 449.99, 43, 'Ski de skating pour compétition', 1, 7, 2, 5, 'images/skating-rs.jpg'),
-('Beast 98', 779.99, 98, 'All mountain pour skieur expert', 3, 2, 3, 6, 'images/beast-98.jpg'),
-('Enforcer 94', 749.99, 94, 'All mountain performant', 2, 2, 1, 1, 'images/enforcer-94.jpg'),
+('Wayback 98', 779.99, 98, 'All mountain pour skieur expert', 3, 2, 3, 6, 'images/wayback-98.jpg'),
+('Enforcer 94', 749.99, 94, 'All mountain performant', 2, 2, 1, 8, 'images/enforcer-94.jpg'),
 ('Kore 93', 699.99, 93, 'All mountain léger', 3, 2, 2, 4, 'images/kore-93.jpg'),
-('Soul Rider 87', 599.99, 87, 'Freestyle all mountain', 2, 3, 3, 7, 'images/soul-rider-87.jpg'),
+('Soul Rider 87', 599.99, 87, 'Freestyle all mountain', 2, 3, 3, 8, 'images/soul-rider-87.jpg'),
 ('MTN Explore 95', 829.99, 95, 'Randonnée haute performance', 3, 6, 1, 2, 'images/mtn-explore-95.jpg'),
 ('V-Shape V10', 649.99, 85, 'Ski de piste sportif', 2, 1, 2, 4, 'images/v-shape-v10.jpg'),
-('Ripstick 96', 779.99, 96, 'All mountain freestyle', 3, 2, 3, 3, 'images/ripstick-96.jpg');
+('Ripstick 96', 779.99, 96, 'All mountain freestyle', 3, 2, 3, 9, 'images/ripstick-96.jpg');
+
+-- Version 1 : Avec hachage pbkdf2:sha256
+INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
+(1, 'admin', 'admin@admin.fr',
+    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
+    'ROLE_admin', 'admin', '1'),
+(2, 'client', 'client@client.fr',
+    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+    'ROLE_client', 'client', '1'),
+(3, 'client2', 'client2@client2.fr',
+    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
+    'ROLE_client', 'client2', '1');
+
+-- Version 2 : Avec hachage scrypt (plus sécurisé)
+-- Décommenter cette version si vous utilisez scrypt à la place de pbkdf2
+/*
+INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
+(1, 'admin', 'admin@admin.fr',
+    'scrypt:32768:8:1$irSP6dJEjy1yXof2$56295be51bb989f467598b63ba6022405139656d6609df8a71768d42738995a21605c9acbac42058790d30fd3adaaec56df272d24bed8385e66229c81e71a4f4',
+    'ROLE_admin', 'admin', '1'),
+(2, 'client', 'client@client.fr',
+    'scrypt:32768:8:1$iFP1d8bdBmhW6Sgc$7950bf6d2336d6c9387fb610ddaec958469d42003fdff6f8cf5a39cf37301195d2e5cad195e6f588b3644d2a9116fa1636eb400b0cb5537603035d9016c15910',
+    'ROLE_client', 'client', '1'),
+(3, 'client2', 'client2@client2.fr',
+    'scrypt:32768:8:1$l3UTNxiLZGuBKGkg$ae3af0d19f0d16d4a495aa633a1cd31ac5ae18f98a06ace037c0f4fb228ed86a2b6abc64262316d0dac936eb72a67ae82cd4d4e4847ee0fb0b19686ee31194b3',
+    'ROLE_client', 'client2', '1');
+*/
+
+-- Note : Pour ajouter d'autres méthodes d'authentification (SSO),
+-- vous pouvez ajouter des colonnes comme :
+-- ALTER TABLE utilisateur ADD COLUMN google_id VARCHAR(255);
+-- ALTER TABLE utilisateur ADD COLUMN facebook_id VARCHAR(255);
