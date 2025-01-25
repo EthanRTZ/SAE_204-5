@@ -48,6 +48,16 @@ CREATE TABLE utilisateur (
     email VARCHAR(255) NOT NULL UNIQUE
 );
 
+CREATE TABLE ligne_panier (
+    id_utilisateur INT,
+    id_ski INT,
+    quantite INT NOT NULL,
+    date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_utilisateur, id_ski),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_ski) REFERENCES ski(id_ski)
+);
+
 -- Insertions des données de base
 INSERT INTO longueur (libelle_taille) VALUES 
 (150), (160), (170), (180);
@@ -116,23 +126,3 @@ INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_a
 (3, 'client2', 'client2@client2.fr',
     'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
     'ROLE_client', 'client2', '1');
-
--- Version 2 : Avec hachage scrypt (plus sécurisé)
--- Décommenter cette version si vous utilisez scrypt à la place de pbkdf2
-/*
-INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
-(1, 'admin', 'admin@admin.fr',
-    'scrypt:32768:8:1$irSP6dJEjy1yXof2$56295be51bb989f467598b63ba6022405139656d6609df8a71768d42738995a21605c9acbac42058790d30fd3adaaec56df272d24bed8385e66229c81e71a4f4',
-    'ROLE_admin', 'admin', '1'),
-(2, 'client', 'client@client.fr',
-    'scrypt:32768:8:1$iFP1d8bdBmhW6Sgc$7950bf6d2336d6c9387fb610ddaec958469d42003fdff6f8cf5a39cf37301195d2e5cad195e6f588b3644d2a9116fa1636eb400b0cb5537603035d9016c15910',
-    'ROLE_client', 'client', '1'),
-(3, 'client2', 'client2@client2.fr',
-    'scrypt:32768:8:1$l3UTNxiLZGuBKGkg$ae3af0d19f0d16d4a495aa633a1cd31ac5ae18f98a06ace037c0f4fb228ed86a2b6abc64262316d0dac936eb72a67ae82cd4d4e4847ee0fb0b19686ee31194b3',
-    'ROLE_client', 'client2', '1');
-*/
-
--- Note : Pour ajouter d'autres méthodes d'authentification (SSO),
--- vous pouvez ajouter des colonnes comme :
--- ALTER TABLE utilisateur ADD COLUMN google_id VARCHAR(255);
--- ALTER TABLE utilisateur ADD COLUMN facebook_id VARCHAR(255);
