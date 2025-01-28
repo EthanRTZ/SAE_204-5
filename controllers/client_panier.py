@@ -103,13 +103,41 @@ def client_panier_filtre():
     filter_prix_min = request.form.get('filter_prix_min', None)
     filter_prix_max = request.form.get('filter_prix_max', None)
     filter_types = request.form.getlist('filter_types', None)
-    # test des variables puis
-    # mise en session des variables
+    filter_marques = request.form.getlist('filter_marques', None)
+
+    if filter_word:
+        session['filter_word'] = filter_word
+    else:
+        session.pop('filter_word', None)
+
+    if filter_prix_min:
+        session['filter_prix_min'] = filter_prix_min
+    else:
+        session.pop('filter_prix_min', None)
+
+    if filter_prix_max:
+        session['filter_prix_max'] = filter_prix_max
+    else:
+        session.pop('filter_prix_max', None)
+
+    if filter_types and len(filter_types) > 0:
+        session['filter_types'] = filter_types
+    else:
+        session.pop('filter_types', None)
+
+    if filter_marques and len(filter_marques) > 0:
+        session['filter_marques'] = filter_marques
+    else:
+        session.pop('filter_marques', None)
+
     return redirect('/client/article/show')
 
 
 @client_panier.route('/client/panier/filtre/suppr', methods=['POST'])
 def client_panier_filtre_suppr():
-    # suppression  des variables en session
-    print("suppr filtre")
+    session.pop('filter_word', None)
+    session.pop('filter_prix_min', None)
+    session.pop('filter_prix_max', None)
+    session.pop('filter_types', None)
+    session.pop('filter_marques', None)
     return redirect('/client/article/show')
