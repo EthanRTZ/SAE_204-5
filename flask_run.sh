@@ -5,10 +5,10 @@
 
 # pour tester votre application, lancer la commande dans un terminal : bash flask_run.sh
 
-HOST=serveurmysql
-LOGIN=login
-PASSWORD=secret
-DATABASE=BDD_login
+HOST=localhost
+LOGIN=erietz
+PASSWORD=Slidium2006
+DATABASE=BDD_erietz
 
 sed -i "s/host=.*/host=\"${HOST}\",/g" connexion_db.py
 sed -i "s/user=.*/user=\"${LOGIN}\",/g" connexion_db.py
