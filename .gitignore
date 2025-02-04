@@ -1,3 +1,4 @@
+.env
 connect.sh
 flask_run.sh
 sql_projet.sql
