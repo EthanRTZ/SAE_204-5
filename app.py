@@ -1,6 +1,9 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
-from flask import Flask, request, render_template, redirect, flash
+
+from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
+from flask import Blueprint
+
 
 from controllers.auth_security import *
 from controllers.fixtures_load import *
@@ -22,25 +25,6 @@ from controllers.client_liste_envies import *
 app = Flask(__name__)
 app.secret_key = 'une cle(token) : grain de sel(any random string)'
 
-from flask import session, g
-import pymysql.cursors
-
-import os                                 # à ajouter
-from dotenv import load_dotenv            # à ajouter
-project_folder = os.path.expanduser('~/SAE_204-5')  # adjust as appropriate (avec le dossier où se trouve le fichier .env et app.py)
-load_dotenv(os.path.join(project_folder, '.env'))                            # à ajouter
-
-def get_db():
-    if 'db' not in g:
-        g.db =  pymysql.connect(
-            host=os.environ.get("SAE2024grp20.mysql.pythonanywhere-services.com"),                # à modifier
-            user=os.environ.get("SAE2024grp20"),               # à modifier
-            password=os.environ.get("zqsd2025"),        # à modifier
-            database=os.environ.get("SAE2024grp20$default"),        # à modifier
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-    return g.db
 
 @app.teardown_appcontext
 def teardown_db(exception):
