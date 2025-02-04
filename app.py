@@ -48,7 +48,7 @@ def show_accueil():
 
 # Middleware de sécurité
 
-#ETHAN
+#ETHAN et noe
 
 @app.before_request
 def before_request():
