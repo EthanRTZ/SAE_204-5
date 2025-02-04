@@ -6,90 +6,111 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
     <div class="container">
-        <div class="row align-self-right">
-        {% include('client/boutique/_panier.html') %}
-            <div class="col">
-              <h3>Les filtres</h3>
-              Articles dont le nom est composé par :<br>
-                 {% include('client/boutique/_filtre.html') %}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                {% include('client/boutique/_panier.html') %}
+            </div>
+            <div class="col-md-9">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex align-items-center">
+                        <i class="fas fa-filter me-2"></i>
+                        <h5 class="mb-0">Filtres de recherche</h5>
+                    </div>
+                    <div class="card-body">
+                        {% include('client/boutique/_filtre.html') %}
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="bg-light p-3">
-            <h1>Les articles</h1>
-        </div>
+        <h2 class="mb-4 d-flex align-items-center">
+            <i class="fas fa-skiing me-2"></i>
+            Nos skis disponibles
+        </h2>
 
-        <div class="row">
-                {% for article in articles  %}
-                        <div class="card col-4 mt-4 p-1">
-                            <div class="card-body border-dark rounded p-1">
-                                <a href="/client/article/details?id_article={{ article.id_article }}" >
-                                <h3 class="card-title">
-                                    <span style="color: #0b2e13">{{ article.nom }}</span><br>
-                                    {{ article.prix }}
-                                    €
-                                </h3>
-                                     {%  if article.image is not none %}
-                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
-                                    {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
-                                    {% endif %}
-                                    <hr>
-                                </a>
-                                <div class="row">
-{# #}                                {% if  article.stock is defined and article.stock != None %}
-{# #}                                    {% if article.stock > 0 %}
-                                        <form  action="/client/panier/add"  method="post" class="col-5">
-                                            <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                                            <div class="input-group">
-                                            <button class="btn  btn-success"  id="button-addon1">
-                                                <i class="fas fa-shopping-cart">Ajouter</i>
-                                            </button>
-                                            <input type="number" id="input-{{ article.id_article }}" step="1" min="0" max="{{ article.stock }}" class="form-control" value="1" name="quantite"  aria-describedby="button-addon1">
-                                            </div>
-                                        </form>
-{# #}                                    {% endif %}
-{# #}                                {% endif %}
-                                     <div class="col-2 align-content-end">
-                                    {% if article.liste_envie is defined %}
-                                         {%if  article.liste_envie== 1%}
-                                             <a href="/client/envie/add?id_article={{ article.id_article }}" style="text-decoration: none">💛</a>
-                                         {% else %}
-                                             <a href="/client/envie/add?id_article={{ article.id_article }}" style="text-decoration: none">🤍</a>
-                                         {% endif %}
-                                    {% endif %}
-                                     </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                            {% if article.stock is defined and article.stock != None %}
-                                 {% if article.stock > 0 %}
-                                    <small class="text-muted">Stock restant : {{ article.stock }}</small>
-                                 {% else %}
-                                    <small class="text-muted">article  momentanément indisponible</small>
-                                 {% endif %}
-                                {% if article.nb_declinaison is defined and article.nb_declinaison != None %}
-                                    ({{ article.nb_declinaison }} d.)
-                                {% endif %}
-                                <br>
-                            {% endif %}
-                            {% if article.nb_notes is defined %}
-                                {% if article.nb_notes > 0 %}
-                                 <a  href="/client/article/details?id_article={{ article.id_article }}" >
-                                    <span style="color: #3A7734"> note : {{  "{:,.1f}".format(article.moy_notes) }}({{ article.nb_notes }})</span>
-                                 </a>
-                                {% endif %}
-                            {% endif %}
-                            {% if article.nb_avis is defined %}
-                                {% if article.nb_avis > 0 %}
-                                 <a href="/client/article/details?id_article={{ article.id_article }}" >
-                                    <span style="color: #3A7734">({{ article.nb_avis }} avis)</span>
-                                 </a>
-                                {% endif %}
-                            {% endif %}
-                            </div>
+        <div class="row g-4">
+            {% for article in articles %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="position-relative">
+                        {% if article.photo_ski is not none %}
+                        <img class="card-img-top p-3" style="height: 250px; object-fit: contain;" 
+                             src="/{{ article.photo_ski }}" alt="image de {{ article.nom_ski }}">
+                        {% else %}
+                        <img class="card-img-top p-3" style="height: 250px; object-fit: contain;"
+                             src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                             alt="image de {{ article.nom_ski }}">
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ article.nom_ski }}</h5>
+                        <div class="mb-2">
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-tag me-1"></i>
+                                {{ article.nom_marque }}
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="fas fa-skiing me-1"></i>
+                                {{ article.libelle }}
+                            </span>
                         </div>
-                {% endfor %}
+                        <p class="h4 mb-3 text-success">{{ article.prix_ski }}€</p>
+                        
+                        <div class="specs mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-ruler-horizontal"></i> Largeur : {{ article.largeur_ski }} mm
+                            </small>
+                            {% if article.conseil_utilisation %}
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-info-circle"></i> {{ article.conseil_utilisation }}
+                            </small>
+                            {% endif %}
+                        </div>
+
+                        <form action="/client/panier/add" method="post">
+                            <input type="hidden" name="id_article" value="{{ article.id_ski }}">
+                            <div class="input-group">
+                                <input type="number" id="input-{{ article.id_ski }}" 
+                                       class="form-control" name="quantite"
+                                       value="1" min="1" max="10" step="1">
+                                <button class="btn btn-success" type="submit">
+                                    <i class="fas fa-cart-plus"></i> Ajouter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-{#    {{ articles | pprint }}#}
+
+    <style>
+    .hover-card {
+        transition: transform 0.2s ease-in-out;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+        margin-right: 0.3em;
+    }
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .specs {
+        border-top: 1px solid #eee;
+        padding-top: 0.8rem;
+    }
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+    .me-1 {
+        margin-right: 0.25rem;
+    }
+    </style>
 {% endblock %}

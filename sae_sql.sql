@@ -1,3 +1,12 @@
+-- Suppression des tables si elles existent
+DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS utilisateur;
+DROP TABLE IF EXISTS ski;
+DROP TABLE IF EXISTS longueur;
+DROP TABLE IF EXISTS type_ski;
+DROP TABLE IF EXISTS fournisseur;
+DROP TABLE IF EXISTS marque;
+
 -- Création des tables
 
 CREATE TABLE longueur (

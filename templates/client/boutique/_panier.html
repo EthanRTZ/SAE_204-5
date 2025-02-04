@@ -1,67 +1,120 @@
-            <div class="col-7">
-            {% if articles_panier | length >= 1 %}
-                <h3>Liste des articles dans mon panier</h3>
-                <table class="table table-hover table-responsive">
-                    <tr>
-                        <th style="width: 300px">Nom</th>
-                        <th style="width: 50px">Quantité</th>
-                        <th style="width: 50px">Prix</th>
-                        <th style="width: 100px">Sous-Total</th>
-                        <th style="width: 400px">Action</th>
-                    </tr>
-                    {% for item_panier in articles_panier %}
-                        <tr>
-                            <td>{{item_panier.nom}}
-                            {% if item_panier.id_couleur is defined and item_panier.id_couleur != None and item_panier.id_couleur >1 %}
-                                <small style="color: #6dcea2">({{ item_panier.libelle_couleur }})</small>
-                            {% endif %}
-                            {% if item_panier.id_taille is defined and item_panier.id_taille != None and item_panier.id_taille >1 %}
-                                <small style="color: #d941c2">({{ item_panier.libelle_taille }})</small>
-                            {% endif %}
-                            </td>
-                            <td>{{item_panier.quantite}}</td>
-                            <td>{{item_panier.prix}}</td>
-                            <td>{{ "{:,.2f} €".format((item_panier.prix * item_panier.quantite)) }}{#{(panier.article.prix * panier.quantite)|number_format(2) }#}</td>
-                            <td>
-{# #}                            {% if item_panier.stock is defined %}
-{# #}                               {% if item_panier.stock > 0 %}
-                                <form action="/client/panier/add"  style="display: inline-block;"  method="post">
-{# #}                                   <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                        <input type="hidden" name="quantite" value="1">
-                                        <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" > + </button>
-                                </form>
-{# #}                               {% endif %}
-{# #}                           {% endif %}
-                                <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
-{# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" > - </button>
-                                </form>
-
-                                <form action="/client/panier/delete/line"  style="display: inline-block;"  method="post">
-{# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" >Supprimer</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-
-                </table>
-                    {% if validation is defined and validation == 1 %}
-                        <a href="/client/article/show" class="btn btn-primary" >Continuer ma commande</a>
-                    {% else %}
-                    <form action="/client/panier/vider"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary"  > Éffacer tout </button>
-                    </form>
-                    <form action="/client/commande/valide"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary" > Passer ma commande </button>
-                    </form>
-                    {% endif %}
-                    {% if prix_total %}
-                    Total à payer : <strong>{{ "{:,.2f} €".format(prix_total) }}</strong>
-                    {% endif %}
-
-            {% endif %}
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white d-flex align-items-center">
+        <i class="fas fa-shopping-cart me-2"></i>
+        <h5 class="mb-0">Mon Panier</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if articles_panier and articles_panier|length > 0 %}
+            <div class="list-group list-group-flush">
+                {% for article in articles_panier %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ article.nom_ski }}</h6>
+                            <small class="text-muted">
+                                {{ article.prix_ski }}€ x {{ article.quantite }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success">
+                                {{ (article.prix_ski * article.quantite)|round(2) }}€
+                            </div>
+                            <form action="/client/panier/delete" method="post" class="d-inline">
+                                <input type="hidden" name="id_article" value="{{ article.id_ski }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm mt-1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
+            
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Total</h6>
+                    <div class="h5 mb-0 text-success">{{ prix_total|round(2) }}€</div>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                    <form action="/client/panier/vider" method="post">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                            <i class="fas fa-trash-alt me-1"></i>Vider le panier
+                        </button>
+                    </form>
+                    <a href="/client/commande/add" class="btn btn-success btn-sm w-100">
+                        <i class="fas fa-check me-1"></i>Commander
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center p-4">
+                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Votre panier est vide</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.fw-bold {
+    font-weight: 600;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid rgba(0,0,0,.125);
+    padding: 1rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.d-grid {
+    display: grid;
+}
+
+.text-success {
+    color: #198754;
+}
+
+.me-1 {
+    margin-right: 0.25rem;
+}
+
+.me-2 {
+    margin-right: 0.5rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+</style>
