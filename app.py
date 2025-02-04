@@ -48,6 +48,8 @@ def show_accueil():
 
 # Middleware de sécurité
 
+#ETHAN
+
 @app.before_request
 def before_request():
      if request.path.startswith('/admin') or request.path.startswith('/client'):
