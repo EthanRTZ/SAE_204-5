@@ -15,10 +15,10 @@ load_dotenv()                             # à ajouter
 def get_db():
     if 'db' not in g:
         g.db =  pymysql.connect(
-            host=os.environ.get("HOST"),                # à modifier
-            user=os.environ.get("LOGIN"),               # à modifier
-            password=os.environ.get("PASSWORD"),        # à modifier
-            database=os.environ.get("DATABASE"),        # à modifier
+            host="localhost",
+            user="gmorel2",
+            password="votre_mot_de_passe",
+            database="BDD_gmorel2",
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
