@@ -7,14 +7,14 @@
 {% block body %}
     <div class="container">
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-6">
                 {% include('client/boutique/_panier.html') %}
             </div>
-            <div class="col-md-9">
+            <div class="col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white d-flex align-items-center">
                         <i class="fas fa-filter me-2"></i>
-                        <h5 class="mb-0">Filtress de recherche</h5>
+                        <h5 class="mb-0">Filtres de recherche</h5>
                     </div>
                     <div class="card-body">
                         {% include('client/boutique/_filtre.html') %}
@@ -66,6 +66,9 @@
                                 <i class="fas fa-info-circle"></i> {{ article.conseil_utilisation }}
                             </small>
                             {% endif %}
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-box"></i> Stock disponible : {{ article.stock }}
+                            </small>
                         </div>
 
                         <form action="/client/panier/add" method="post">
@@ -73,9 +76,10 @@
                             <div class="input-group">
                                 <input type="number" id="input-{{ article.id_ski }}" 
                                        class="form-control" name="quantite"
-                                       value="1" min="1" max="10" step="1">
-                                <button class="btn btn-success" type="submit">
-                                    <i class="fas fa-cart-plus"></i> Ajouter
+                                       value="1" min="1" max="{{ article.stock }}" step="1"
+                                       {% if article.stock <= 0 %}disabled{% endif %}>
+                                <button class="btn btn-success" type="submit" {% if article.stock <= 0 %}disabled{% endif %}>
+                                    <i class="fas fa-cart-plus"></i> {% if article.stock > 0 %}Ajouter{% else %}Rupture{% endif %}
                                 </button>
                             </div>
                         </form>
@@ -85,32 +89,4 @@
             {% endfor %}
         </div>
     </div>
-
-    <style>
-    .hover-card {
-        transition: transform 0.2s ease-in-out;
-    }
-    .hover-card:hover {
-        transform: translateY(-5px);
-    }
-    .badge {
-        font-weight: 500;
-        padding: 0.5em 0.8em;
-        margin-right: 0.3em;
-    }
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-    .specs {
-        border-top: 1px solid #eee;
-        padding-top: 0.8rem;
-    }
-    .me-2 {
-        margin-right: 0.5rem;
-    }
-    .me-1 {
-        margin-right: 0.25rem;
-    }
-    </style>
 {% endblock %}

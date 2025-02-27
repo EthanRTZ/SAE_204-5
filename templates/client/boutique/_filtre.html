@@ -1,169 +1,79 @@
-<form method="post" action="/client/panier/filtre">
-    <div class="row g-3">
-        <!-- Recherche -->
-        <div class="col-md-12 mb-3">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input name="filter_word" type="text" class="form-control search-input" placeholder="Rechercher un ski..."
-                    value="{% if session['filter_word'] %}{{ session['filter_word'] }}{% endif %}">
-            </div>
-        </div>
-
-        <!-- Prix -->
-        <div class="col-md-4">
-            <label class="filter-label">
-                <i class="fas fa-euro-sign me-1"></i>Prix
-            </label>
-            <div class="input-group">
-                <input name="filter_prix_min" type="number" placeholder="Min" class="form-control"
-                    value="{% if session['filter_prix_min'] %}{{ session['filter_prix_min'] }}{% endif %}">
-                <span class="input-group-text">-</span>
-                <input name="filter_prix_max" type="number" placeholder="Max" class="form-control"
-                    value="{% if session['filter_prix_max'] %}{{ session['filter_prix_max'] }}{% endif %}">
-            </div>
-        </div>
-
-        <!-- Types de ski -->
-        <div class="col-md-4">
-            {% if types_ski is defined %}
-            <label class="filter-label">
-                <i class="fas fa-skiing me-1"></i>Types de ski
-            </label>
-            <div class="filter-scroll custom-scrollbar">
-                {% for type in types_ski %}
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input custom-checkbox" name="filter_types" 
-                           id="type-{{ type.id_type_ski }}"
-                           value="{{ type.id_type_ski }}"
-                        {% set id_item = type.id_type_ski | string %}
-                        {% if session['filter_types'] %}
-                        {{ ' checked ' if (id_item in session['filter_types']) else '' }}
-                        {% endif %}>
-                    <label class="form-check-label" for="type-{{ type.id_type_ski }}">
-                        {{ type.libelle_type_ski }}
-                    </label>
+<div class="filter-container">
+    <form method="post" action="/client/panier/filtre" class="mb-0">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Rechercher</label>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input name="filter_word" type="text" class="form-control search-input" 
+                           placeholder="Rechercher un ski..."
+                           value="{{ session['filter_word'] if session['filter_word'] else '' }}">
                 </div>
-                {% endfor %}
             </div>
-            {% endif %}
-        </div>
 
-        <!-- Marques -->
-        <div class="col-md-4">
-            {% if marques_ski is defined %}
-            <label class="filter-label">
-                <i class="fas fa-tag me-1"></i>Marques
-            </label>
-            <div class="filter-scroll custom-scrollbar">
-                {% for marque in marques_ski %}
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input custom-checkbox" name="filter_marques"
-                           id="marque-{{ marque.id_marque }}"
-                           value="{{ marque.id_marque }}"
-                        {% set id_marque = marque.id_marque | string %}
-                        {% if session['filter_marques'] %}
-                        {{ ' checked ' if (id_marque in session['filter_marques']) else '' }}
-                        {% endif %}>
-                    <label class="form-check-label" for="marque-{{ marque.id_marque }}">
-                        {{ marque.nom_marque }}
-                    </label>
+            <div class="col-md-6">
+                <label class="form-label">Prix</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                    <input name="filter_prix_min" type="number" placeholder="Min" class="form-control"
+                           value="{{ session['filter_prix_min'] if session['filter_prix_min'] else '' }}"
+                           min="0" step="0.01">
+                    <input name="filter_prix_max" type="number" placeholder="Max" class="form-control"
+                           value="{{ session['filter_prix_max'] if session['filter_prix_max'] else '' }}"
+                           min="0" step="0.01">
                 </div>
-                {% endfor %}
             </div>
-            {% endif %}
-        </div>
-    </div>
 
-    <div class="mt-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-filter me-1"></i>Appliquer les filtres
-        </button>
-        {% if session['filter_word'] or session['filter_prix_max'] or session['filter_prix_min'] or session['filter_types'] or session['filter_marques']%}
-        <form action="/client/panier/filtre/suppr" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-secondary">
+            <div class="col-md-6">
+                <label class="form-label">Types de ski</label>
+                {% if types_ski is defined %}
+                <div class="checkbox-group">
+                    {% for type in types_ski %}
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="filter_types" 
+                               value="{{ type.id_type_ski }}" id="type_{{ type.id_type_ski }}"
+                               {% if session['filter_types'] and (type.id_type_ski|string) in session['filter_types'] %}
+                               checked
+                               {% endif %}>
+                        <label class="form-check-label" for="type_{{ type.id_type_ski }}">
+                            {{ type.libelle_type_ski }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Marques</label>
+                {% if marques_ski is defined %}
+                <div class="checkbox-group">
+                    {% for marque in marques_ski %}
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="filter_marques" 
+                               value="{{ marque.id_marque }}" id="marque_{{ marque.id_marque }}"
+                               {% if session['filter_marques'] and (marque.id_marque|string) in session['filter_marques'] %}
+                               checked
+                               {% endif %}>
+                        <label class="form-check-label" for="marque_{{ marque.id_marque }}">
+                            {{ marque.nom_marque }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3 gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter me-1"></i>Appliquer
+            </button>
+            {% if session['filter_word'] or session['filter_prix_max'] or session['filter_prix_min'] or session['filter_types'] or session['filter_marques'] %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm" formaction="/client/panier/filtre/suppr">
                 <i class="fas fa-times me-1"></i>Réinitialiser
             </button>
-        </form>
-        {% endif %}
-    </div>
-</form>
-
-<style>
-.filter-label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #495057;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.filter-scroll {
-    max-height: 150px;
-    overflow-y: auto;
-    padding: 0.5rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    background: white;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.search-container {
-    position: relative;
-}
-
-.search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    z-index: 2;
-}
-
-.search-input {
-    padding-left: 35px;
-}
-
-.form-check {
-    margin-bottom: 0.5rem;
-}
-
-.form-check-label {
-    font-size: 0.9rem;
-    color: #495057;
-}
-
-.custom-checkbox {
-    cursor: pointer;
-}
-
-.input-group-text {
-    background-color: #f8f9fa;
-    color: #6c757d;
-}
-
-.gap-2 {
-    gap: 0.5rem;
-}
-
-.me-1 {
-    margin-right: 0.25rem;
-}
-</style>
+            {% endif %}
+        </div>
+    </form>
+</div>

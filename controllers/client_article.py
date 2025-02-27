@@ -26,8 +26,8 @@ def client_article_show():
     marques_ski = mycursor.fetchall()
 
     # Construction de la requête de base pour les skis
-    sql_base = '''
-    SELECT s.*, t.libelle_type_ski as libelle, m.nom_marque as nom_marque
+    sql = '''
+    SELECT s.*, t.libelle_type_ski as libelle, m.nom_marque
     FROM ski s
     LEFT JOIN type_ski t ON s.id_type_ski = t.id_type_ski
     LEFT JOIN marque m ON s.id_marque = m.id_marque
@@ -35,43 +35,49 @@ def client_article_show():
     '''
     params = []
 
-    # Ajout des conditions de filtrage
+    # Application des filtres
     if 'filter_word' in session and session['filter_word']:
-        sql_base += ''' AND (s.nom_ski LIKE %s OR m.nom_marque LIKE %s)'''
-        params.extend(['%' + session['filter_word'] + '%'] * 2)
+        sql += ''' AND (s.nom_ski LIKE %s OR m.nom_marque LIKE %s)'''
+        search_term = f"%{session['filter_word']}%"
+        params.extend([search_term, search_term])
+
+    if 'filter_prix_min' in session and session['filter_prix_min']:
+        sql += ''' AND s.prix_ski >= %s'''
+        params.append(session['filter_prix_min'])
+
+    if 'filter_prix_max' in session and session['filter_prix_max']:
+        sql += ''' AND s.prix_ski <= %s'''
+        params.append(session['filter_prix_max'])
 
     if 'filter_types' in session and session['filter_types']:
-        sql_base += ''' AND s.id_type_ski IN ({})'''.format(','.join(['%s'] * len(session['filter_types'])))
+        placeholders = ','.join(['%s'] * len(session['filter_types']))
+        sql += f''' AND s.id_type_ski IN ({placeholders})'''
         params.extend(session['filter_types'])
 
     if 'filter_marques' in session and session['filter_marques']:
-        sql_base += ''' AND s.id_marque IN ({})'''.format(','.join(['%s'] * len(session['filter_marques'])))
+        placeholders = ','.join(['%s'] * len(session['filter_marques']))
+        sql += f''' AND s.id_marque IN ({placeholders})'''
         params.extend(session['filter_marques'])
 
-    if 'filter_prix_min' in session and session['filter_prix_min']:
-        sql_base += ''' AND s.prix_ski >= %s'''
-        params.append(float(session['filter_prix_min']))
-
-    if 'filter_prix_max' in session and session['filter_prix_max']:
-        sql_base += ''' AND s.prix_ski <= %s'''
-        params.append(float(session['filter_prix_max']))
-
-    # Exécution de la requête finale pour les articles
-    mycursor.execute(sql_base, tuple(params))
+    # Exécution de la requête finale
+    mycursor.execute(sql, tuple(params))
     articles = mycursor.fetchall()
 
-    # Calcul du panier
+    # Récupération du panier
     sql = '''
-    SELECT s.*, lp.quantite 
-    FROM ski s 
-    INNER JOIN ligne_panier lp ON s.id_ski = lp.id_ski 
+    SELECT s.*, lp.quantite, t.libelle_type_ski as libelle, m.nom_marque
+    FROM ski s
+    INNER JOIN ligne_panier lp ON s.id_ski = lp.id_ski
+    LEFT JOIN type_ski t ON s.id_type_ski = t.id_type_ski
+    LEFT JOIN marque m ON s.id_marque = m.id_marque
     WHERE lp.id_utilisateur = %s
     '''
     mycursor.execute(sql, (id_client,))
     articles_panier = mycursor.fetchall()
 
+    # Calcul du prix total du panier
     prix_total = None
-    if len(articles_panier) >= 1:
+    if articles_panier:
         sql = '''
         SELECT SUM(s.prix_ski * lp.quantite) as prix_total
         FROM ski s
@@ -79,7 +85,8 @@ def client_article_show():
         WHERE lp.id_utilisateur = %s
         '''
         mycursor.execute(sql, (id_client,))
-        prix_total = mycursor.fetchone()['prix_total']
+        result = mycursor.fetchone()
+        prix_total = result['prix_total'] if result else None
 
     return render_template('client/boutique/panier_article.html',
                          articles=articles,

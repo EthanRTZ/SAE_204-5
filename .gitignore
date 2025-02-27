@@ -3,5 +3,6 @@ connect.sh
 flask_run.sh
 sql_projet.sql
 connexion_db.py
-__pycache__/
-.idea/
+*__pycache__*
+*.idea/*
+.gitignore
