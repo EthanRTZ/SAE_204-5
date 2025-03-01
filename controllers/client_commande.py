@@ -32,56 +32,115 @@ def client_commande_valide():
                            )
 
 
-@client_commande.route('/client/commande/add', methods=['POST'])
+@client_commande.route('/client/commande/add', methods=['POST', 'GET'])
 def client_commande_add():
-    mycursor = get_db().cursor()
+    try:
+        mycursor = get_db().cursor()
+        id_client = session['id_user']
 
-    # choix de(s) (l')adresse(s)
+        # Sélection du contenu du panier de l'utilisateur
+        sql = '''
+        SELECT s.*, lp.quantite, s.prix_ski * lp.quantite as prix_ligne
+        FROM ski s
+        INNER JOIN ligne_panier lp ON s.id_ski = lp.id_ski
+        WHERE lp.id_utilisateur = %s
+        '''
+        mycursor.execute(sql, (id_client,))
+        items_ligne_panier = mycursor.fetchall()
 
-    id_client = session['id_user']
-    sql = ''' selection du contenu du panier de l'utilisateur '''
-    items_ligne_panier = []
-    # if items_ligne_panier is None or len(items_ligne_panier) < 1:
-    #     flash(u'Pas d\'articles dans le ligne_panier', 'alert-warning')
-    #     return redirect('/client/article/show')
-                                           # https://pynative.com/python-mysql-transaction-management-using-commit-rollback/
-    #a = datetime.strptime('my date', "%b %d %Y %H:%M")
+        if not items_ligne_panier or len(items_ligne_panier) < 1:
+            flash(u'Pas d\'articles dans le panier', 'alert-warning')
+            return redirect('/client/article/show')
 
-    sql = ''' creation de la commande '''
+        # Calcul du prix total
+        prix_total = sum(item['prix_ligne'] for item in items_ligne_panier)
 
-    sql = '''SELECT last_insert_id() as last_insert_id'''
-    # numéro de la dernière commande
-    for item in items_ligne_panier:
-        sql = ''' suppression d'une ligne de panier '''
-        sql = "  ajout d'une ligne de commande'"
+        # Création de la commande
+        sql = '''
+        INSERT INTO commande(id_utilisateur, date_achat, etat)
+        VALUES (%s, NOW(), 'en cours')
+        '''
+        mycursor.execute(sql, (id_client,))
 
-    get_db().commit()
-    flash(u'Commande ajoutée','alert-success')
-    return redirect('/client/article/show')
+        # Récupération de l'ID de la commande
+        sql = '''SELECT LAST_INSERT_ID() as last_insert_id'''
+        mycursor.execute(sql)
+        id_commande = mycursor.fetchone()['last_insert_id']
+
+        # Ajout des lignes de commande
+        for item in items_ligne_panier:
+            sql = '''
+            INSERT INTO ligne_commande(id_commande, id_ski, quantite, prix)
+            VALUES (%s, %s, %s, %s)
+            '''
+            mycursor.execute(sql, (id_commande, item['id_ski'], item['quantite'], item['prix_ski']))
+
+        # Suppression du panier
+        sql = '''DELETE FROM ligne_panier WHERE id_utilisateur = %s'''
+        mycursor.execute(sql, (id_client,))
+
+        get_db().commit()
+        flash(u'Commande validée avec succès', 'alert-success')
+        return redirect('/client/article/show')
+
+    except Exception as e:
+        print("Erreur lors de la commande:", str(e))
+        get_db().rollback()
+        flash(u'Erreur lors de la validation de la commande', 'alert-danger')
+        return redirect('/client/article/show')
 
 
-
-
-@client_commande.route('/client/commande/show', methods=['get','post'])
+@client_commande.route('/client/commande/show', methods=['GET'])
 def client_commande_show():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = '''  selection des commandes ordonnées par état puis par date d'achat descendant '''
-    commandes = []
 
-    articles_commande = None
-    commande_adresses = None
-    id_commande = request.args.get('id_commande', None)
-    if id_commande != None:
-        print(id_commande)
-        sql = ''' selection du détails d'une commande '''
+    # Récupération des commandes de l'utilisateur
+    sql = '''
+    SELECT c.*, 
+           COUNT(lc.id_ski) as nb_articles,
+           SUM(lc.quantite * lc.prix) as prix_total
+    FROM commande c
+    LEFT JOIN ligne_commande lc ON c.id_commande = lc.id_commande
+    WHERE c.id_utilisateur = %s
+    GROUP BY c.id_commande
+    ORDER BY c.date_achat DESC
+    '''
+    mycursor.execute(sql, (id_client,))
+    commandes = mycursor.fetchall()
 
-        # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
+    return render_template('client/commandes/show.html',
+                         commandes=commandes)
 
-    return render_template('client/commandes/show.html'
-                           , commandes=commandes
-                           , articles_commande=articles_commande
-                           , commande_adresses=commande_adresses
-                           )
+@client_commande.route('/client/commande/details/<int:id_commande>', methods=['GET'])
+def client_commande_details(id_commande):
+    mycursor = get_db().cursor()
+    id_client = session['id_user']
+
+    # Vérification que la commande appartient bien au client
+    sql = '''
+    SELECT c.* 
+    FROM commande c
+    WHERE c.id_commande = %s AND c.id_utilisateur = %s
+    '''
+    mycursor.execute(sql, (id_commande, id_client))
+    commande = mycursor.fetchone()
+
+    if not commande:
+        flash(u'Commande non trouvée', 'alert-warning')
+        return redirect('/client/commande/show')
+
+    # Récupération des détails de la commande
+    sql = '''
+    SELECT s.nom_ski, lc.quantite, lc.prix, lc.quantite * lc.prix as prix_ligne
+    FROM ligne_commande lc
+    INNER JOIN ski s ON lc.id_ski = s.id_ski
+    WHERE lc.id_commande = %s
+    '''
+    mycursor.execute(sql, (id_commande,))
+    articles_commande = mycursor.fetchall()
+
+    return render_template('client/commandes/details.html',
+                         commande=commande,
+                         articles_commande=articles_commande)
 

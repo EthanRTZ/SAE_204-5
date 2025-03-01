@@ -63,42 +63,45 @@
                     <table class="table my-0" id="dataTable">
                         <thead>
                         <tr>
-                            <th>login client</th>
-                            <th>Date de commande</th>
-                            <th>Nombre d'articles</th>
-                            <th>Coût total</th>
-                            <th>Etat de la commande</th>
-                            <th style="text-align: center;">Options</th>
+                            <th>N° Commande</th>
+                            <th>Client</th>
+                            <th>Date</th>
+                            <th>Articles</th>
+                            <th>Total</th>
+                            <th>État</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for commande in commandes %}
-                            <tr id="" {% if commande.etat_id == 1 %} class="table-warning" style="font-weight: bold;"{% endif %}>
-                                <td>{{ commande.login }}</td>
-                                <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td> {{ commande.nbr_articles }} </td>
-                                <td>
-                                    {{ commande.prix_total }}
-                                </td>
-                                <td> {{ commande.libelle }}</td>
-                                <td style="text-align: center;">
-                                    <form action="/admin/commande/valider" style="display: inline-block;"  method="post">
-                                        <input type="hidden" name="id_commande" value="{{ commande.id_commande }}">
-                                        <button class="btn btn-primary" > Valider (Expédier) </button>
-                                    </form>
-                                    <a href="/admin/commande/show?id_commande={{ commande.id_commande }}">
-                                        <button class="btn btn-primary" > Details </button>
-                                    </a>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>#{{ commande.id_commande }}</td>
+                            <td>
+                                {{ commande.nom_client }}
+                                <small class="text-muted d-block">{{ commande.email_client }}</small>
+                            </td>
+                            <td>{{ commande.date_achat.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ commande.nb_articles }}</td>
+                            <td>{{ commande.prix_total|round(2) }}€</td>
+                            <td>
+                                <span class="badge {% if commande.etat == 'en cours' %}bg-warning
+                                                 {% elif commande.etat == 'en préparation' %}bg-info
+                                                 {% else %}bg-success{% endif %}">
+                                    {{ commande.etat }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_commande.admin_commande_details', id_commande=commande.id_commande) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </td>
+                        </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
-
-        </div>
         </div>
     </div>
 {% endblock %}

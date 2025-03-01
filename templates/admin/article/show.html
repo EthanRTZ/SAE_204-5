@@ -1,0 +1,262 @@
+{% extends "admin/layout_admin.html" %}
+{% block body %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="fas fa-skiing me-2"></i>
+            Gestion des articles
+        </h2>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addArticleModal">
+            <i class="fas fa-plus me-2"></i>Ajouter un article
+        </button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Marque</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td>
+                                {% if article.photo_ski %}
+                                <img src="/{{ article.photo_ski }}" alt="{{ article.nom_ski }}" 
+                                     style="width: 50px; height: 50px; object-fit: contain;">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                                     alt="Pas de photo" style="width: 50px; height: 50px; object-fit: contain;">
+                                {% endif %}
+                            </td>
+                            <td>{{ article.nom_ski }}</td>
+                            <td>{{ article.libelle_type_ski }}</td>
+                            <td>{{ article.nom_marque }}</td>
+                            <td>{{ article.prix_ski }}€</td>
+                            <td>
+                                <span class="badge {% if article.stock < 5 %}bg-danger
+                                                 {% elif article.stock < 10 %}bg-warning
+                                                 {% else %}bg-success{% endif %}">
+                                    {{ article.stock }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                                        data-bs-target="#editArticleModal{{ article.id_ski }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="{{ url_for('admin_article.admin_article_delete', id_article=article.id_ski) }}" 
+                                      method="post" class="d-inline" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Modal de modification -->
+                        <div class="modal fade" id="editArticleModal{{ article.id_ski }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Modifier l'article</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ url_for('admin_article.admin_article_edit', id_article=article.id_ski) }}" 
+                                          method="post" enctype="multipart/form-data">
+                                        <div class="modal-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Nom</label>
+                                                    <input type="text" class="form-control" name="nom" 
+                                                           value="{{ article.nom_ski }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Prix</label>
+                                                    <input type="number" class="form-control" name="prix" 
+                                                           value="{{ article.prix_ski }}" step="0.01" min="0" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Largeur (mm)</label>
+                                                    <input type="number" class="form-control" name="largeur" 
+                                                           value="{{ article.largeur_ski }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Stock</label>
+                                                    <input type="number" class="form-control" name="stock" 
+                                                           value="{{ article.stock }}" min="0" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Type de ski</label>
+                                                    <select class="form-select" name="type" required>
+                                                        {% for type in types_ski %}
+                                                        <option value="{{ type.id_type_ski }}" 
+                                                                {% if type.id_type_ski == article.id_type_ski %}selected{% endif %}>
+                                                            {{ type.libelle_type_ski }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Marque</label>
+                                                    <select class="form-select" name="marque" required>
+                                                        {% for marque in marques %}
+                                                        <option value="{{ marque.id_marque }}"
+                                                                {% if marque.id_marque == article.id_marque %}selected{% endif %}>
+                                                            {{ marque.nom_marque }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Longueur</label>
+                                                    <select class="form-select" name="longueur" required>
+                                                        {% for longueur in longueurs %}
+                                                        <option value="{{ longueur.id_longueur }}"
+                                                                {% if longueur.id_longueur == article.id_longueur %}selected{% endif %}>
+                                                            {{ longueur.libelle_taille }}cm
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Fournisseur</label>
+                                                    <select class="form-select" name="fournisseur" required>
+                                                        {% for fournisseur in fournisseurs %}
+                                                        <option value="{{ fournisseur.id_fournisseur }}"
+                                                                {% if fournisseur.id_fournisseur == article.id_fournisseur %}selected{% endif %}>
+                                                            {{ fournisseur.nom_fournisseur }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Conseil d'utilisation</label>
+                                                    <textarea class="form-control" name="conseil" rows="3">{{ article.conseil_utilisation }}</textarea>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Photo</label>
+                                                    <input type="file" class="form-control" name="photo" accept="image/*">
+                                                    <small class="text-muted">Laissez vide pour garder la photo actuelle</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'ajout -->
+<div class="modal fade" id="addArticleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un article</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_article.admin_article_add') }}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nom</label>
+                            <input type="text" class="form-control" name="nom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Prix</label>
+                            <input type="number" class="form-control" name="prix" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Largeur (mm)</label>
+                            <input type="number" class="form-control" name="largeur" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-control" name="stock" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Type de ski</label>
+                            <select class="form-select" name="type" required>
+                                <option value="">Sélectionner un type</option>
+                                {% for type in types_ski %}
+                                <option value="{{ type.id_type_ski }}">{{ type.libelle_type_ski }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Marque</label>
+                            <select class="form-select" name="marque" required>
+                                <option value="">Sélectionner une marque</option>
+                                {% for marque in marques %}
+                                <option value="{{ marque.id_marque }}">{{ marque.nom_marque }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Longueur</label>
+                            <select class="form-select" name="longueur" required>
+                                <option value="">Sélectionner une longueur</option>
+                                {% for longueur in longueurs %}
+                                <option value="{{ longueur.id_longueur }}">{{ longueur.libelle_taille }}cm</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fournisseur</label>
+                            <select class="form-select" name="fournisseur" required>
+                                <option value="">Sélectionner un fournisseur</option>
+                                {% for fournisseur in fournisseurs %}
+                                <option value="{{ fournisseur.id_fournisseur }}">{{ fournisseur.nom_fournisseur }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Conseil d'utilisation</label>
+                            <textarea class="form-control" name="conseil" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Photo</label>
+                            <input type="file" class="form-control" name="photo" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

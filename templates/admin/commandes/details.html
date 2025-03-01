@@ -1,0 +1,112 @@
+{% extends "admin/layout_admin.html" %}
+{% block body %}
+<div class="container">
+    <h2 class="mb-4 d-flex align-items-center">
+        <i class="fas fa-file-invoice me-2"></i>
+        Détails de la commande #{{ commande.id_commande }}
+    </h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user me-2"></i>
+                    Informations client
+                </div>
+                <div class="card-body">
+                    <h5>{{ commande.nom }}</h5>
+                    <p class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        {{ commande.email }}
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-user-tag me-2"></i>
+                        {{ commande.role }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-tasks me-2"></i>
+                    État de la commande
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('admin_commande.admin_commande_valider', id_commande=commande.id_commande) }}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">État actuel :</label>
+                            <select name="nouvel_etat" class="form-select">
+                                <option value="en cours" {% if commande.etat == 'en cours' %}selected{% endif %}>
+                                    En cours
+                                </option>
+                                <option value="en préparation" {% if commande.etat == 'en préparation' %}selected{% endif %}>
+                                    En préparation
+                                </option>
+                                <option value="expédié" {% if commande.etat == 'expédié' %}selected{% endif %}>
+                                    Expédié
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>
+                            Mettre à jour l'état
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Articles commandés
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Article</th>
+                                    <th>Stock actuel</th>
+                                    <th>Quantité</th>
+                                    <th>Prix unitaire</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for article in articles_commande %}
+                                <tr>
+                                    <td>{{ article.nom_ski }}</td>
+                                    <td>
+                                        <span class="badge {% if article.stock < 5 %}bg-danger{% else %}bg-success{% endif %}">
+                                            {{ article.stock }}
+                                        </span>
+                                    </td>
+                                    <td>{{ article.quantite }}</td>
+                                    <td>{{ article.prix }}€</td>
+                                    <td>{{ article.prix_ligne|round(2) }}€</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                    <td><strong>{{ articles_commande|sum(attribute='prix_ligne')|round(2) }}€</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('admin_commande.admin_commande_show') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Retour aux commandes
+        </a>
+    </div>
+</div>
+{% endblock %} 

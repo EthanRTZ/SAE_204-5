@@ -1,0 +1,62 @@
+{% extends "admin/layout_admin.html" %}
+{% block body %}
+<div class="container">
+    <h2 class="mb-4 d-flex align-items-center">
+        <i class="fas fa-boxes me-2"></i>
+        Gestion des stocks
+    </h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Article</th>
+                            <th>Stock actuel</th>
+                            <th>Commandes en cours</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td>{{ article.nom_ski }}</td>
+                            <td>
+                                <span class="badge {% if article.stock < 5 %}bg-danger{% elif article.stock < 10 %}bg-warning{% else %}bg-success{% endif %}">
+                                    {{ article.stock }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ article.commandes_en_cours }}
+                                </span>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_stock.admin_stock_edit', id_ski=article.id_ski) }}" method="post" class="d-flex align-items-center gap-2">
+                                    <input type="number" name="nouveau_stock" class="form-control form-control-sm" style="width: 100px;" value="{{ article.stock }}" min="0" required>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

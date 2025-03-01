@@ -1,4 +1,6 @@
 -- Suppression des tables si elles existent
+DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS ski;
@@ -68,6 +70,24 @@ CREATE TABLE ligne_panier (
     FOREIGN KEY (id_ski) REFERENCES ski(id_ski)
 );
 
+CREATE TABLE commande (
+    id_commande INT PRIMARY KEY AUTO_INCREMENT,
+    id_utilisateur INT,
+    date_achat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    etat VARCHAR(20) DEFAULT 'en cours',
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
+
+CREATE TABLE ligne_commande (
+    id_commande INT,
+    id_ski INT,
+    quantite INT NOT NULL,
+    prix DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (id_commande, id_ski),
+    FOREIGN KEY (id_commande) REFERENCES commande(id_commande),
+    FOREIGN KEY (id_ski) REFERENCES ski(id_ski)
+);
+
 -- Insertions des données de base
 INSERT INTO longueur (libelle_taille) VALUES 
 (150), (160), (170), (180);
@@ -113,7 +133,6 @@ INSERT INTO ski (nom_ski, prix_ski, largeur_ski, conseil_utilisation, stock, id_
 ('S/Race Rush SL', 849.99, 65, 'Ski de slalom haute performance', 3, 2, 4, 2, 2, 'static/images/srace-rush-sl.jpg'),
 ('Backland 85', 699.99, 85, 'Ski de randonnée léger et polyvalent', 6, 3, 6, 3, 3, 'static/images/backland-85.jpg'),
 ('QST Blank', 799.99, 112, 'Ski freeride pour poudreuse profonde', 2, 4, 8, 1, 2, 'static/images/qst-blank.jpg'),
-('NFX', 549.99, 85, 'Ski freestyle park et pipe', 7, 2, 3, 2, 1, 'static/images/nfx.jpg'),
 ('ARV 106', 729.99, 106, 'Ski freestyle backcountry', 4, 3, 3, 3, 2, 'static/images/arv-106.jpg'),
 ('RC4 WC CT', 999.99, 72, 'Ski de course haut niveau', 2, 2, 5, 1, 4, 'static/images/rc4-wc-ct.jpg'),
 ('Skating RS', 449.99, 43, 'Ski de skating pour compétition', 5, 1, 7, 2, 5, 'static/images/skating-rs.jpg'),

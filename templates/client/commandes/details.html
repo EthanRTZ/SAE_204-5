@@ -1,0 +1,66 @@
+{% extends "client/layout_client.html" %}
+{% block body %}
+<div class="container">
+    <h2 class="mb-4 d-flex align-items-center">
+        <i class="fas fa-file-invoice me-2"></i>
+        Détails de la commande #{{ commande.id_commande }}
+    </h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <div class="row">
+                <div class="col-md-4">
+                    <small class="text-muted">Date de commande</small>
+                    <div>{{ commande.date_achat.strftime('%d/%m/%Y %H:%M') }}</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">État</small>
+                    <div>
+                        <span class="badge {% if commande.etat == 'en cours' %}bg-warning{% else %}bg-success{% endif %}">
+                            {{ commande.etat }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Article</th>
+                            <th>Quantité</th>
+                            <th>Prix unitaire</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles_commande %}
+                        <tr>
+                            <td>{{ article.nom_ski }}</td>
+                            <td>{{ article.quantite }}</td>
+                            <td>{{ article.prix }}€</td>
+                            <td>{{ article.prix_ligne|round(2) }}€</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total</strong></td>
+                            <td><strong>{{ articles_commande|sum(attribute='prix_ligne')|round(2) }}€</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('client_commande.client_commande_show') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Retour aux commandes
+        </a>
+    </div>
+</div>
+{% endblock %} 
