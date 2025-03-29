@@ -71,6 +71,12 @@
                             </small>
                         </div>
 
+                        <form action="/client/envie/add" method="post" class="mb-2">
+                            <input type="hidden" name="id_article" value="{{ article.id_ski }}">
+                            <button class="btn btn-outline-danger w-100" type="submit">
+                                <i class="fas fa-heart"></i> Ajouter à la wishlist
+                            </button>
+                        </form>
                         <form action="/client/panier/add" method="post">
                             <input type="hidden" name="id_article" value="{{ article.id_ski }}">
                             <div class="input-group">
