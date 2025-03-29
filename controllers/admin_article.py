@@ -63,7 +63,7 @@ def admin_article_show():
 def admin_article_add():
     if request.method == 'POST':
         mycursor = get_db().cursor()
-        
+
         nom = request.form.get('nom', '')
         prix = request.form.get('prix', type=float)
         largeur = request.form.get('largeur', type=int)
@@ -79,37 +79,33 @@ def admin_article_add():
             flash(u'Tous les champs obligatoires doivent être remplis', 'alert-warning')
             return redirect('/admin/article/show')
 
-        try:
-            # Gestion de l'upload de photo
-            photo = request.files.get('photo')
-            photo_path = None
-            if photo and photo.filename:
-                filename = secure_filename(photo.filename)
-                photo_path = os.path.join('static/images', filename)
-                photo.save(os.path.join('static/images', filename))
+        # Gestion de l'upload de photo
+        photo = request.files.get('photo')
+        photo_path = None
+        if photo and photo.filename:
+            filename = secure_filename(photo.filename)
+            photo_path = os.path.join('static/images', filename)
+            photo.save(os.path.join('static/images', filename))
 
-            # Insertion de l'article
-            sql = '''
-            INSERT INTO ski (nom_ski, prix_ski, largeur_ski, conseil_utilisation, 
-                           stock, id_type_ski, id_marque, id_longueur, id_fournisseur, photo_ski)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            '''
-            mycursor.execute(sql, (nom, prix, largeur, conseil, stock, 
-                                 id_type, id_marque, id_longueur, id_fournisseur, photo_path))
-            get_db().commit()
-            
-            flash(u'Article ajouté avec succès', 'alert-success')
-        except Exception as e:
-            print(e)
-            flash(u'Erreur lors de l\'ajout de l\'article', 'alert-danger')
-            
+        # Insertion de l'article
+        sql = '''
+        INSERT INTO ski (nom_ski, prix_ski, largeur_ski, conseil_utilisation, 
+                       stock, id_type_ski, id_marque, id_longueur, id_fournisseur, photo_ski)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        mycursor.execute(sql, (nom, prix, largeur, conseil, stock,
+                               id_type, id_marque, id_longueur, id_fournisseur, photo_path))
+        get_db().commit()
+
+        flash(u'Article ajouté avec succès', 'alert-success')
+
         return redirect('/admin/article/show')
 
 
 @admin_article.route('/admin/article/edit/<int:id_article>', methods=['POST'])
 def admin_article_edit(id_article):
     mycursor = get_db().cursor()
-    
+
     nom = request.form.get('nom', '')
     prix = request.form.get('prix', type=float)
     largeur = request.form.get('largeur', type=int)
@@ -125,79 +121,71 @@ def admin_article_edit(id_article):
         flash(u'Tous les champs obligatoires doivent être remplis', 'alert-warning')
         return redirect('/admin/article/show')
 
-    try:
-        # Gestion de l'upload de photo
-        photo = request.files.get('photo')
-        photo_path = None
-        if photo and photo.filename:
-            filename = secure_filename(photo.filename)
-            photo_path = os.path.join('static/images', filename)
-            photo.save(os.path.join('static/images', filename))
-            
-            # Mise à jour avec nouvelle photo
-            sql = '''
-            UPDATE ski 
-            SET nom_ski = %s, prix_ski = %s, largeur_ski = %s, conseil_utilisation = %s,
-                stock = %s, id_type_ski = %s, id_marque = %s, id_longueur = %s, 
-                id_fournisseur = %s, photo_ski = %s
-            WHERE id_ski = %s
-            '''
-            mycursor.execute(sql, (nom, prix, largeur, conseil, stock, 
-                                 id_type, id_marque, id_longueur, id_fournisseur, 
-                                 photo_path, id_article))
-        else:
-            # Mise à jour sans changer la photo
-            sql = '''
-            UPDATE ski 
-            SET nom_ski = %s, prix_ski = %s, largeur_ski = %s, conseil_utilisation = %s,
-                stock = %s, id_type_ski = %s, id_marque = %s, id_longueur = %s, 
-                id_fournisseur = %s
-            WHERE id_ski = %s
-            '''
-            mycursor.execute(sql, (nom, prix, largeur, conseil, stock, 
-                                 id_type, id_marque, id_longueur, id_fournisseur, id_article))
-        
-        get_db().commit()
-        flash(u'Article modifié avec succès', 'alert-success')
-    except Exception as e:
-        print(e)
-        flash(u'Erreur lors de la modification de l\'article', 'alert-danger')
-        
+    # Gestion de l'upload de photo
+    photo = request.files.get('photo')
+    photo_path = None
+    if photo and photo.filename:
+        filename = secure_filename(photo.filename)
+        photo_path = os.path.join('static/images', filename)
+        photo.save(os.path.join('static/images', filename))
+
+        # Mise à jour avec nouvelle photo
+        sql = '''
+        UPDATE ski 
+        SET nom_ski = %s, prix_ski = %s, largeur_ski = %s, conseil_utilisation = %s,
+            stock = %s, id_type_ski = %s, id_marque = %s, id_longueur = %s, 
+            id_fournisseur = %s, photo_ski = %s
+        WHERE id_ski = %s
+        '''
+        mycursor.execute(sql, (nom, prix, largeur, conseil, stock,
+                               id_type, id_marque, id_longueur, id_fournisseur,
+                               photo_path, id_article))
+    else:
+        # Mise à jour sans changer la photo
+        sql = '''
+        UPDATE ski 
+        SET nom_ski = %s, prix_ski = %s, largeur_ski = %s, conseil_utilisation = %s,
+            stock = %s, id_type_ski = %s, id_marque = %s, id_longueur = %s, 
+            id_fournisseur = %s
+        WHERE id_ski = %s
+        '''
+        mycursor.execute(sql, (nom, prix, largeur, conseil, stock,
+                               id_type, id_marque, id_longueur, id_fournisseur, id_article))
+
+    get_db().commit()
+    flash(u'Article modifié avec succès', 'alert-success')
+
     return redirect('/admin/article/show')
 
 
 @admin_article.route('/admin/article/delete/<int:id_article>', methods=['POST'])
 def admin_article_delete(id_article):
     mycursor = get_db().cursor()
-    
-    try:
-        # Vérifier si l'article est dans des commandes
-        sql = '''
-        SELECT COUNT(*) as nb_commandes 
-        FROM ligne_commande 
-        WHERE id_ski = %s
-        '''
-        mycursor.execute(sql, (id_article,))
-        result = mycursor.fetchone()
-        
-        if result['nb_commandes'] > 0:
-            flash(u'Impossible de supprimer cet article car il est présent dans des commandes', 'alert-warning')
-            return redirect('/admin/article/show')
-            
-        # Supprimer l'article du panier
-        sql = '''DELETE FROM ligne_panier WHERE id_ski = %s'''
-        mycursor.execute(sql, (id_article,))
-        
-        # Supprimer l'article
-        sql = '''DELETE FROM ski WHERE id_ski = %s'''
-        mycursor.execute(sql, (id_article,))
-        
-        get_db().commit()
-        flash(u'Article supprimé avec succès', 'alert-success')
-    except Exception as e:
-        print(e)
-        flash(u'Erreur lors de la suppression de l\'article', 'alert-danger')
-        
+
+    # Vérifier si l'article est dans des commandes
+    sql = '''
+    SELECT COUNT(*) as nb_commandes 
+    FROM ligne_commande 
+    WHERE id_ski = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    result = mycursor.fetchone()
+
+    if result['nb_commandes'] > 0:
+        flash(u'Impossible de supprimer cet article car il est présent dans des commandes', 'alert-warning')
+        return redirect('/admin/article/show')
+
+    # Supprimer l'article du panier
+    sql = '''DELETE FROM ligne_panier WHERE id_ski = %s'''
+    mycursor.execute(sql, (id_article,))
+
+    # Supprimer l'article
+    sql = '''DELETE FROM ski WHERE id_ski = %s'''
+    mycursor.execute(sql, (id_article,))
+
+    get_db().commit()
+    flash(u'Article supprimé avec succès', 'alert-success')
+
     return redirect('/admin/article/show')
 
 

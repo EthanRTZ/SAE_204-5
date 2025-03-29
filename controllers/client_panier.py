@@ -11,72 +11,62 @@ client_panier = Blueprint('client_panier', __name__,
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
-    try:
-        mycursor = get_db().cursor()
-        id_client = session['id_user']
-        id_article = request.form.get('id_article')
-        if not id_article:
-            flash(u'Article invalide', 'alert-warning')
-            return redirect('/client/article/show')
-
-        try:
-            quantite = int(request.form.get('quantite', 1))
-            if quantite <= 0:
-                flash(u'Quantité invalide', 'alert-warning')
-                return redirect('/client/article/show')
-        except ValueError:
-            flash(u'Quantité invalide', 'alert-warning')
-            return redirect('/client/article/show')
-
-        # Vérifier le stock disponible avec un SELECT FOR UPDATE pour éviter les conflits
-        sql = '''SELECT stock FROM ski WHERE id_ski = %s FOR UPDATE'''
-        mycursor.execute(sql, (id_article,))
-        result = mycursor.fetchone()
-        
-        if not result:
-            flash(u'Article non trouvé', 'alert-warning')
-            return redirect('/client/article/show')
-        
-        if result['stock'] < quantite:
-            flash(u'Stock insuffisant', 'alert-warning')
-            return redirect('/client/article/show')
-
-        # Vérifier si l'article est déjà dans le panier
-        sql = '''SELECT quantite FROM ligne_panier 
-                 WHERE id_utilisateur = %s AND id_ski = %s FOR UPDATE'''
-        mycursor.execute(sql, (id_client, id_article))
-        panier_existant = mycursor.fetchone()
-
-        if panier_existant:
-            # Mettre à jour la quantité si l'article existe déjà
-            nouvelle_quantite = panier_existant['quantite'] + quantite
-            if nouvelle_quantite > result['stock']:
-                flash(u'Stock insuffisant pour cette quantité totale', 'alert-warning')
-                return redirect('/client/article/show')
-                
-            sql = '''UPDATE ligne_panier 
-                     SET quantite = %s 
-                     WHERE id_utilisateur = %s AND id_ski = %s'''
-            mycursor.execute(sql, (nouvelle_quantite, id_client, id_article))
-        else:
-            # Ajouter l'article au panier
-            sql = '''INSERT INTO ligne_panier (id_utilisateur, id_ski, quantite) 
-                     VALUES (%s, %s, %s)'''
-            mycursor.execute(sql, (id_client, id_article, quantite))
-
-        # Mettre à jour le stock
-        sql = '''UPDATE ski SET stock = stock - %s WHERE id_ski = %s'''
-        mycursor.execute(sql, (quantite, id_article))
-        
-        get_db().commit()
-        flash(u'Article ajouté au panier', 'alert-success')
+    mycursor = get_db().cursor()
+    id_client = session['id_user']
+    id_article = request.form.get('id_article')
+    if not id_article:
+        flash(u'Article invalide', 'alert-warning')
         return redirect('/client/article/show')
-        
-    except Exception as e:
-        print("Erreur :", str(e))  # Pour le débogage
-        get_db().rollback()
-        flash(u'Erreur lors de l\'ajout au panier', 'alert-danger')
+
+    quantite = int(request.form.get('quantite', 1))
+    if quantite <= 0:
+        flash(u'Quantité invalide', 'alert-warning')
         return redirect('/client/article/show')
+
+    # Vérifier le stock disponible avec un SELECT FOR UPDATE pour éviter les conflits
+    sql = '''SELECT stock FROM ski WHERE id_ski = %s FOR UPDATE'''
+    mycursor.execute(sql, (id_article,))
+    result = mycursor.fetchone()
+
+    if not result:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/client/article/show')
+
+    if result['stock'] < quantite:
+        flash(u'Stock insuffisant', 'alert-warning')
+        return redirect('/client/article/show')
+
+    # Vérifier si l'article est déjà dans le panier
+    sql = '''SELECT quantite FROM ligne_panier 
+             WHERE id_utilisateur = %s AND id_ski = %s FOR UPDATE'''
+    mycursor.execute(sql, (id_client, id_article))
+    panier_existant = mycursor.fetchone()
+
+    if panier_existant:
+        # Mettre à jour la quantité si l'article existe déjà
+        nouvelle_quantite = panier_existant['quantite'] + quantite
+        if nouvelle_quantite > result['stock']:
+            flash(u'Stock insuffisant pour cette quantité totale', 'alert-warning')
+            return redirect('/client/article/show')
+
+        sql = '''UPDATE ligne_panier 
+                 SET quantite = %s 
+                 WHERE id_utilisateur = %s AND id_ski = %s'''
+        mycursor.execute(sql, (nouvelle_quantite, id_client, id_article))
+    else:
+        # Ajouter l'article au panier
+        sql = '''INSERT INTO ligne_panier (id_utilisateur, id_ski, quantite) 
+                 VALUES (%s, %s, %s)'''
+        mycursor.execute(sql, (id_client, id_article, quantite))
+
+    # Mettre à jour le stock
+    sql = '''UPDATE ski SET stock = stock - %s WHERE id_ski = %s'''
+    mycursor.execute(sql, (quantite, id_article))
+
+    get_db().commit()
+    flash(u'Article ajouté au panier', 'alert-success')
+    return redirect('/client/article/show')
+
 
 @client_panier.route('/client/panier/delete', methods=['POST'])
 def client_panier_delete():
