@@ -16,9 +16,9 @@ def get_db():
     if 'db' not in g:
         g.db =  pymysql.connect(
             host="localhost",
-            user="gmorel2",
-            password="votre_mot_de_passe",
-            database="BDD_gmorel2",
+            user="erietz",
+            password="Slidium2006",
+            database="BDD_erietz",
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
