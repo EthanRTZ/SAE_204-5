@@ -2,12 +2,13 @@
 DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS ligne_panier;
-DROP TABLE IF EXISTS utilisateur;
+DROP TABLE IF EXISTS liste_envies;
 DROP TABLE IF EXISTS ski;
-DROP TABLE IF EXISTS longueur;
-DROP TABLE IF EXISTS type_ski;
-DROP TABLE IF EXISTS fournisseur;
+DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS marque;
+DROP TABLE IF EXISTS fournisseur;
+DROP TABLE IF EXISTS type_ski;
+DROP TABLE IF EXISTS longueur;
 
 -- Création des tables
 
@@ -60,6 +61,18 @@ CREATE TABLE utilisateur (
     email VARCHAR(255) NOT NULL UNIQUE
 );
 
+CREATE TABLE liste_envies (
+    id_client INT NOT NULL,
+    id_article INT NOT NULL,
+    nom VARCHAR(100),
+    prix DECIMAL(10,2),
+    stock INT,
+    image VARCHAR(255),
+    PRIMARY KEY (id_client, id_article),
+    FOREIGN KEY (id_client) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_article) REFERENCES ski(id_ski)
+);
+
 CREATE TABLE ligne_panier (
     id_utilisateur INT,
     id_ski INT,
@@ -89,7 +102,7 @@ CREATE TABLE ligne_commande (
 );
 
 -- Insertions des données de base
-INSERT INTO longueur (libelle_taille) VALUES 
+INSERT INTO longueur (libelle_taille) VALUES
 (150), (160), (170), (180);
 
 INSERT INTO type_ski (libelle_type_ski) VALUES

@@ -20,7 +20,7 @@ articles (tableau de dictionnaires)
 <table class="table">
     <thead class="thead-dark">
         <tr>
-            <th>nom</th><th>id</th><th>prix</th><th>stock</th><th>nb déclinaisons</th><th>image</th><th>opération</th>
+            <th>nom</th><th>id</th><th>prix</th><th>stock</th><th>image</th><th>opération</th>
         </tr>
     </thead>
     <tbody>
@@ -29,7 +29,7 @@ articles (tableau de dictionnaires)
            <tr>
                   <td><a href="/client/envies/show?id_article_detail_wishlist={{ ligne.id_article }}">{{ ligne.nom }}</a></td>
                   <td>{{ ligne.id_article }}</td>
-                  <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
+                  <td>{{ "{:,.2f} €".format(ligne.prix) }}</td>
                   <td>
                   {% if ligne.stock is defined %}
                      {% if ligne.stock > 0 %}
@@ -41,59 +41,35 @@ articles (tableau de dictionnaires)
                       ND
                   {% endif %}
                   </td>
-
-                 {# <td>{{ ligne.date_create }} {{ ligne.date_create.strftime('%d-%m-%Y') }} </td> #}
                   <td>
-                      {% if ligne.nb_declinaisons is defined %}
-                        {{ ligne.nb_declinaisons }}
-                      {% else %}
-                         decli ND
-                      {% endif %}
-                  </td>
-                  <td>
-                        {%  if ligne.image is not none %}
-                            <img style="width:40px;height:40px"  src="{{ url_for('static', filename = 'images/' + ligne['image']) }}"  alt="image  de {{ ligne.nom }}" >
+                        {% if ligne.image is not none %}
+                            <img style="width:40px;height:40px" src="/{{ ligne.image }}" alt="image de {{ ligne.nom }}">
                         {% else %}
-                            <img style="width:40px;height:40px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="pas d image" >
+                            <img style="width:40px;height:40px" src="{{ url_for('static', filename='images/no_photo.jpeg') }}" alt="pas d'image">
                         {% endif %}
                   </td>
                   <td>
-                      <div class="row">
-                          <div class="col-3">
-                              <a  class="btn btn-outline-danger" href="/client/envie/delete?id_article={{ ligne.id_article }}" >supprimer</a>
-                          </div>
-                          <div class="col-3">
-                          <form  action="/client/panier/add"  method="post" >
+                      <div class="d-flex flex-wrap gap-2">
+                          <a class="btn btn-outline-danger" href="/client/envie/delete?id_article={{ ligne.id_article }}">supprimer</a>
+                          <form action="/client/panier/add" method="post" class="d-inline">
                               <input type="hidden" name="id_article" value="{{ ligne.id_article }}">
                               <input type="hidden" name="quantite" value="1">
-                                            <div class="input-group">
-                                            <button class="btn  btn-outline-success"  id="button-addon1">
-                                                <i class="fas fa-shopping-cart">commander</i>
-                                            </button>
-                                            </div>
+                              <button class="btn btn-outline-success">
+                                  <i class="fas fa-shopping-cart">commander</i>
+                              </button>
                           </form>
-                          </div>
-                          {% if loop.index !=1 %}
-                          <div class="col-1">
-                              <a  class="btn btn-outline-warning" href="/client/envies/up?id_article={{ ligne.id_article }}">⬆</a>
-                          </div>
+                          {% if loop.index != 1 %}
+                              <a class="btn btn-outline-warning" href="/client/envies/up?id_article={{ ligne.id_article }}">⬆</a>
                           {% endif %}
                           {% if loop.index != loop.length %}
-                          <div class="col-1">
-                              <a  class="btn btn-outline-warning" href="/client/envies/down?id_article={{ ligne.id_article }}">️⬇</a>
-                          </div>
+                              <a class="btn btn-outline-warning" href="/client/envies/down?id_article={{ ligne.id_article }}">⬇</a>
                           {% endif %}
-                          {% if  loop.index != 1 %}
-                          <div class="col-1">
-                              <a  class="btn btn-outline-warning" href="/client/envies/first?id_article={{ ligne.id_article }}">⏫</a>
-                          </div>
+                          {% if loop.index != 1 %}
+                              <a class="btn btn-outline-warning" href="/client/envies/first?id_article={{ ligne.id_article }}">⏫</a>
                           {% endif %}
-                          {% if   loop.index != loop.length %}
-                          <div class="col-1">
-                              <a  class="btn btn-outline-warning" href="/client/envies/last?id_article={{ ligne.id_article }}">⏬</a>
-                          </div>
+                          {% if loop.index != loop.length %}
+                              <a class="btn btn-outline-warning" href="/client/envies/last?id_article={{ ligne.id_article }}">⏬</a>
                           {% endif %}
-                          <div class="col-1">{{ compteur_id_article }}</div>
                       </div>
                   </td>
            </tr>
@@ -128,7 +104,7 @@ articles (tableau de dictionnaires)
     {% endif %}
 
     <hr>  <!-- ------------------------------------------------------------------------------------------------------------- -->
-    <h3>Derniers articles consultés (6 maximum)</h3>
+    {#<h3>Derniers articles consultés (6 maximum)</h3>
     <div class="row">
                 {% for article in articles_historique  %}
                         <div class="card col-2 mt-2 p-1">
@@ -140,7 +116,7 @@ articles (tableau de dictionnaires)
                                     €
                                 </h3>
                                      {%  if article.image is not none %}
-                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
+                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="/{{ article.image }}"  alt="image  de {{ article.nom }}" >
                                     {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
                                     {% endif %}
                                     <hr>
@@ -150,6 +126,6 @@ articles (tableau de dictionnaires)
                 {% endfor %}
         </div>
     <strong style="color: red">{{ nb_liste_historique }} article(s)/6</strong>  <span style="color: red">dans l'historique</span>
-    </div>
+    </div>#}
 
 {% endblock %}
