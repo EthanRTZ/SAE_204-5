@@ -85,6 +85,16 @@ CREATE TABLE wishlist_details (
     FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
+CREATE TABLE historique (
+    id_historique INT AUTO_INCREMENT PRIMARY KEY,
+    id_client INT NOT NULL,
+    id_article INT NOT NULL,
+    date_consultation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_client) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_article) REFERENCES ski(id_ski),
+    UNIQUE KEY unique_client_article (id_client, id_article)
+);
+
 
 CREATE TABLE ligne_panier (
     id_utilisateur INT,

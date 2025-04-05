@@ -14,48 +14,32 @@ client_commentaire = Blueprint('client_commentaire', __name__,
 @client_commentaire.route('/client/article/details', methods=['GET'])
 def client_article_details():
     mycursor = get_db().cursor()
-    id_article =  request.args.get('id_article', None)
+    id_article = request.args.get('id_article', None)
     id_client = session['id_user']
 
-    ## partie 4
-    # client_historique_add(id_article, id_client)
+    # Ajout à l'historique
+    client_historique_add(id_article, id_client)
 
+    # Récupération des informations de l'article
     sql = '''
+    SELECT s.id_ski as id_article, s.nom_ski as nom, s.prix_ski as prix, 
+           s.stock, s.photo_ski as image
+    FROM ski s
+    WHERE s.id_ski = %s
     '''
-    #mycursor.execute(sql, id_article)
-    #article = mycursor.fetchone()
-    article=[]
-    commandes_articles=[]
-    nb_commentaires=[]
+    mycursor.execute(sql, (id_article,))
+    article = mycursor.fetchone()
+
     if article is None:
         abort(404, "pb id article")
-    # sql = '''
-    #
-    # '''
-    # mycursor.execute(sql, ( id_article))
-    # commentaires = mycursor.fetchall()
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # commandes_articles = mycursor.fetchone()
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # note = mycursor.fetchone()
-    # print('note',note)
-    # if note:
-    #     note=note['note']
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # nb_commentaires = mycursor.fetchone()
-    return render_template('client/article_info/article_details.html'
-                           , article=article
-                           # , commentaires=commentaires
-                           , commandes_articles=commandes_articles
-                           # , note=note
-                            , nb_commentaires=nb_commentaires
-                           )
+
+    commandes_articles = []
+    nb_commentaires = []
+
+    return render_template('client/article_info/article_details.html',
+                           article=article,
+                           commandes_articles=commandes_articles,
+                           nb_commentaires=nb_commentaires)
 
 @client_commentaire.route('/client/commentaire/add', methods=['POST'])
 def client_comment_add():
