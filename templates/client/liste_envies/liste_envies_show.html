@@ -14,97 +14,114 @@ articles (tableau de dictionnaires)
 {% endblock %}
 
 {% block body %}
-<h3>votre liste d'envies</h3>
-<br><br>
+    <h3>votre liste d'envies</h3>
+    <br><br>
 
-<table class="table">
-    <thead class="thead-dark">
+    <table class="table">
+        <thead class="thead-dark">
         <tr>
-            <th>nom</th><th>id</th><th>prix</th><th>stock</th><th>image</th><th>opération</th>
+            <th>nom</th>
+            <th>id</th>
+            <th>prix</th>
+            <th>stock</th>
+            <th>image</th>
+            <th>opération</th>
         </tr>
-    </thead>
-    <tbody>
-    {% if articles_liste_envies | length >= 1 %}
-        {% for ligne in articles_liste_envies %}
-           <tr>
-                  <td><a href="/client/envies/show?id_article_detail_wishlist={{ ligne.id_article }}">{{ ligne.nom }}</a></td>
-                  <td>{{ ligne.id_article }}</td>
-                  <td>{{ "{:,.2f} €".format(ligne.prix) }}</td>
-                  <td>
-                  {% if ligne.stock is defined %}
-                     {% if ligne.stock > 0 %}
-                        <strong style="color: green">{{ ligne.stock }}</strong>
-                     {% else %}
-                        <strong class="text-muted">article momentanément indisponible</strong>
-                     {% endif %}
-                  {% else %}
-                      ND
-                  {% endif %}
-                  </td>
-                  <td>
-                        {% if ligne.image is not none %}
-                            <img style="width:40px;height:40px" src="/{{ ligne.image }}" alt="image de {{ ligne.nom }}">
+        </thead>
+        <tbody>
+        {% if articles_liste_envies | length >= 1 %}
+            {% for ligne in articles_liste_envies %}
+                <tr>
+                    <td>
+                        <a href="/client/envies/show?id_article_detail_wishlist={{ ligne.id_article }}">{{ ligne.nom }}</a>
+                    </td>
+                    <td>{{ ligne.id_article }}</td>
+                    <td>{{ "{:,.2f} €".format(ligne.prix) }}</td>
+                    <td>
+                        {% if ligne.stock is defined %}
+                            {% if ligne.stock > 0 %}
+                                <strong style="color: green">{{ ligne.stock }}</strong>
+                            {% else %}
+                                <strong class="text-muted">article momentanément indisponible</strong>
+                            {% endif %}
                         {% else %}
-                            <img style="width:40px;height:40px" src="{{ url_for('static', filename='images/no_photo.jpeg') }}" alt="pas d'image">
+                            ND
                         {% endif %}
-                  </td>
-                  <td>
-                      <div class="d-flex flex-wrap gap-2">
-                          <a class="btn btn-outline-danger" href="/client/envie/delete?id_article={{ ligne.id_article }}">supprimer</a>
-                          <form action="/client/panier/add" method="post" class="d-inline">
-                              <input type="hidden" name="id_article" value="{{ ligne.id_article }}">
-                              <input type="hidden" name="quantite" value="1">
-                              <button class="btn btn-outline-success">
-                                  <i class="fas fa-shopping-cart">commander</i>
-                              </button>
-                          </form>
-                          {% if loop.index != 1 %}
-                              <a class="btn btn-outline-warning" href="/client/envies/up?id_article={{ ligne.id_article }}">⬆</a>
-                          {% endif %}
-                          {% if loop.index != loop.length %}
-                              <a class="btn btn-outline-warning" href="/client/envies/down?id_article={{ ligne.id_article }}">⬇</a>
-                          {% endif %}
-                          {% if loop.index != 1 %}
-                              <a class="btn btn-outline-warning" href="/client/envies/first?id_article={{ ligne.id_article }}">⏫</a>
-                          {% endif %}
-                          {% if loop.index != loop.length %}
-                              <a class="btn btn-outline-warning" href="/client/envies/last?id_article={{ ligne.id_article }}">⏬</a>
-                          {% endif %}
-                      </div>
-                  </td>
-           </tr>
-        {% endfor %}
-    {% else %}
-            <tr>
-                  <td>
-                      pas d'article
-                  </td>
-           </tr>
-    {% endif %}
-    </tbody>
-</table>
-    <strong style="color: red">{{ nb_liste_envies }} article(s)</strong> <span style="color: red">dans la WishList</span><br>
-    {%  if info_wishlist is defined and info_wishlist.nb_wish_list_other is defined %}
-    {%  if  info_wishlist.nb_wish_list_other > 0 %}
-        <strong style="color: green">{{ info_wishlist.nb_wish_list_other }} </strong> <span style="color: green">article(s) de nom </span>
-        <strong style="color: green"> {{ info_wishlist.nom }}</strong> <span style="color: green">dans la WishList des autres</span>
-    {% else %}
-        <span style="color: green">Vous êtes le seul à avoir cet article dans votre wishlist</span>
-    {% endif %}
+                    </td>
+                    <td>
+                        {% if ligne.image is not none %}
+                            <img style="width:50px;height:120px" src="/{{ ligne.image }}"
+                                 alt="image de {{ ligne.nom }}">
+                        {% else %}
+                            <img style="width:40px;height:120px"
+                                 src="{{ url_for('static', filename='images/no_photo.jpeg') }}" alt="pas d'image">
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-outline-danger"
+                               href="/client/envie/delete?id_article={{ ligne.id_article }}">supprimer</a>
 
-    <br>   <span style="color: blue">  il y a <strong>
-        {%  if  info_wishlist_categorie.nb_wish_list_other_categorie is defined and info_wishlist_categorie.nb_wish_list_other_categorie > 0 %}
-        {{ info_wishlist_categorie.nb_wish_list_other_categorie }}
+                            {% if loop.index != 1 %}
+                                <a class="btn btn-outline-warning"
+                                   href="/client/envies/up?id_article={{ ligne.id_article }}">⬆</a>
+                            {% endif %}
+                            {% if loop.index != loop.length %}
+                                <a class="btn btn-outline-warning"
+                                   href="/client/envies/down?id_article={{ ligne.id_article }}">⬇</a>
+                            {% endif %}
+                            {% if loop.index != 1 %}
+                                <a class="btn btn-outline-warning"
+                                   href="/client/envies/first?id_article={{ ligne.id_article }}">⏫</a>
+                            {% endif %}
+                            {% if loop.index != loop.length %}
+                                <a class="btn btn-outline-warning"
+                                   href="/client/envies/last?id_article={{ ligne.id_article }}">⏬</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
         {% else %}
-        aucun
+            <tr>
+                <td>
+                    pas d'article
+                </td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <strong style="color: red">{{ nb_liste_envies }} article(s)</strong>
+    <span style="color: red">dans la WishList</span><br>
+    
+    {# Section qui affiche les détails de l'article sélectionné #}
+    {# On vérifie qu'on a bien les infos, qu'un article est sélectionné et que la liste n'est pas vide #}
+    {% if articles_liste_envies|length >= 1 and info_wishlist is defined and info_wishlist.nb_wish_list_other is defined and id_article_detail %}
+        {# 1. Affichage du nombre d'autres utilisateurs qui ont cet article #}
+        {% if  info_wishlist.nb_wish_list_other > 0 %}
+            <strong style="color: green">{{ info_wishlist.nb_wish_list_other }} </strong>
+            <span style="color: green">article(s) de nom </span>
+            <strong style="color: green"> {{ info_wishlist.nom }}</strong>
+            <span style="color: green">dans la WishList des autres</span>
+        {% else %}
+            <span style="color: green">Vous êtes le seul à avoir cet article dans votre wishlist</span>
+        {% endif %}
+
+        <br>   
+        {# 2. Affichage du nombre d'articles de la même catégorie #}
+        <span style="color: blue">  il y a <strong>
+        {% if  info_wishlist_categorie.nb_wish_list_other_categorie is defined and info_wishlist_categorie.nb_wish_list_other_categorie > 0 %}
+            {{ info_wishlist_categorie.nb_wish_list_other_categorie }}
+        {% else %}
+            aucun
         {% endif %}</strong>
             article(s) dans la même catégorie : "<strong>{{ info_wishlist_categorie.libelle }}</strong>"  que ce produit dans votre wishlist
-
-    </span>
+        </span>
     {% endif %}
 
-    <hr>  <!-- ------------------------------------------------------------------------------------------------------------- -->
-    {#<h3>Derniers articles consultés (6 maximum)</h3>
+    <hr>
+    <!-- ------------------------------------------------------------------------------------------------------------- -->
+    <h3>Derniers articles consultés (6 maximum)</h3>
     <div class="row">
                 {% for article in articles_historique  %}
                         <div class="card col-2 mt-2 p-1">
@@ -126,6 +143,6 @@ articles (tableau de dictionnaires)
                 {% endfor %}
         </div>
     <strong style="color: red">{{ nb_liste_historique }} article(s)/6</strong>  <span style="color: red">dans l'historique</span>
-    </div>#}
+    </div>
 
 {% endblock %}

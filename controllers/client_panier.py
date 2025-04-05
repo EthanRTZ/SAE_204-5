@@ -65,6 +65,10 @@ def client_panier_add():
     sql = '''UPDATE ski SET stock = stock - %s WHERE id_ski = %s'''
     mycursor.execute(sql, (quantite, id_article))
 
+    # Supprimer l'article de la liste d'envies s'il y est
+    sql = '''DELETE FROM liste_envies WHERE id_client = %s AND id_article = %s'''
+    mycursor.execute(sql, (id_client, id_article))
+
     get_db().commit()
     flash(u'Article ajouté au panier', 'alert-success')
     return redirect('/client/article/show')

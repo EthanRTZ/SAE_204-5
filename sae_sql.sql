@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS wishlist_details;
 DROP TABLE IF EXISTS liste_envies;
 DROP TABLE IF EXISTS ski;
 DROP TABLE IF EXISTS utilisateur;
@@ -68,10 +69,22 @@ CREATE TABLE liste_envies (
     prix DECIMAL(10,2),
     stock INT,
     image VARCHAR(255),
+    date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_client, id_article),
     FOREIGN KEY (id_client) REFERENCES utilisateur(id_utilisateur),
     FOREIGN KEY (id_article) REFERENCES ski(id_ski)
 );
+
+CREATE TABLE wishlist_details (
+    id_article INT NOT NULL,
+    id_utilisateur INT NOT NULL,
+    nb_wish_list_other INT DEFAULT 0,
+    nb_wish_list_other_categorie INT DEFAULT 0,
+    PRIMARY KEY (id_article, id_utilisateur),
+    FOREIGN KEY (id_article) REFERENCES ski(id_ski),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
+
 
 CREATE TABLE ligne_panier (
     id_utilisateur INT,
